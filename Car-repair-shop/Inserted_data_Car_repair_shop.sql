@@ -1,94 +1,5 @@
-CREATE SCHEMA IF NOT EXISTS car_repair_shop;
-
-
--- Create all tables.
-CREATE TABLE IF NOT EXISTS car_repair_shop.detail (
-  detail_id         SERIAL PRIMARY KEY,
-  brand_nm          VARCHAR(30),
-  detail_price_amt  DECIMAL(7,3) NOT NULL CHECK ( detail_price_amt >= 0.00 ),
-  detail_desc       TEXT
-);
-
-CREATE TABLE IF NOT EXISTS car_repair_shop.customer (
-  customer_id         SERIAL PRIMARY KEY,
-  customer_phone_no   BIGINT CHECK ( customer_phone_no > 0 ),
-  customer_nm         VARCHAR(30) NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS car_repair_shop.address (
-  address_id          SERIAL PRIMARY KEY,
-  address_type_nm     VARCHAR(10) NOT NULL,
-  address_country_nm  VARCHAR(30) NOT NULL,
-  address_city_nm     VARCHAR(30) NOT NULL,
-  address_street_nm   VARCHAR(30) NOT NULL,
-  address_building_no INT NOT NULL CHECK ( address_building_no > 0 )
-);
-
-CREATE TABLE IF NOT EXISTS car_repair_shop.employee (
-  employee_id           SERIAL PRIMARY KEY,
-  store_address_id      SERIAL REFERENCES car_repair_shop.address(address_id),
-  employee_phone_no     BIGINT CHECK ( employee_phone_no > 0 ),
-  employee_nm           VARCHAR(30) NOT NULL,
-  employee_surname_nm   VARCHAR(30) NOT NULL,
-  employee_position_nm  VARCHAR(40) NOT NULL,
-  employee_start_dt     DATE  NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS car_repair_shop.provider (
-  provider_address_id   SERIAL PRIMARY KEY REFERENCES car_repair_shop.address(address_id),
-  provider_phone_no     BIGINT CHECK ( provider_phone_no > 0 ),
-  provider_nm           VARCHAR(30) NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS car_repair_shop.vehicle (
-  vehicle_id          SERIAL PRIMARY KEY,
-  customer_id         SERIAL REFERENCES car_repair_shop.customer(customer_id),
-  vehicle_brand_nm    VARCHAR(30) NOT NULL,
-  vehicle_model_nm    VARCHAR(30) NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS car_repair_shop.store_branch (
-  store_address_id   SERIAL PRIMARY KEY REFERENCES car_repair_shop.address(address_id),
-  store_phone_no     BIGINT CHECK ( store_phone_no > 0 ),
-  store_branch_nm    VARCHAR(40) NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS car_repair_shop.order (
-  order_id                SERIAL PRIMARY KEY,
-  vehicle_id              SERIAL REFERENCES car_repair_shop.vehicle(vehicle_id),
-  employee_id             SERIAL REFERENCES car_repair_shop.employee(employee_id),
-  store_address_id        SERIAL REFERENCES car_repair_shop.store_branch(store_address_id),
-  order_application_dttm  TIMESTAMP,
-  order_delivery_dt       DATE  NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS car_repair_shop.store_branch_x_provider (
-  store_address_id      SERIAL REFERENCES car_repair_shop.address(address_id),
-  provider_address_id   SERIAL REFERENCES car_repair_shop.address(address_id),
-  CONSTRAINT PK_store_branch_x_provider PRIMARY KEY (store_address_id, provider_address_id)
-);
-
-CREATE TABLE IF NOT EXISTS car_repair_shop.order_x_detail (
-  detail_id      SERIAL REFERENCES car_repair_shop.detail(detail_id),
-  order_id       SERIAL REFERENCES car_repair_shop.order(order_id),
-  CONSTRAINT PK_order_x_detail PRIMARY KEY (detail_id, order_id)
-);
-
-CREATE TABLE IF NOT EXISTS car_repair_shop.vehicle_x_detail (
-  vehicle_id    SERIAL REFERENCES car_repair_shop.vehicle(vehicle_id),
-  detail_id     SERIAL REFERENCES car_repair_shop.detail(detail_id),
-  CONSTRAINT PK_vehicle_x_detail PRIMARY KEY (vehicle_id, detail_id)
-);
-
-CREATE TABLE IF NOT EXISTS car_repair_shop.provider_x_detail (
-  provider_address_id     SERIAL REFERENCES car_repair_shop.provider(provider_address_id),
-  detail_id               SERIAL REFERENCES car_repair_shop.detail(detail_id),
-  CONSTRAINT PK_provider_x_detail PRIMARY KEY (provider_address_id, detail_id)
-);
-
-
 -- Insert data.
--- Addresses.
+--------------------------------------- Addresses.
 INSERT INTO car_repair_shop.address (
                                      address_type_nm,
                                      address_country_nm,
@@ -161,7 +72,7 @@ INSERT INTO car_repair_shop.address (
                                      address_building_no)
 VALUES ('provider', 'China', 'Hong Kong', 'Fung Mo St', 6);
 
---Stores.
+--------------------------------------- Stores.
 INSERT INTO car_repair_shop.store_branch (
                                      store_address_id,
                                      store_phone_no,
@@ -192,7 +103,7 @@ INSERT INTO car_repair_shop.store_branch (
                                      store_branch_nm)
 VALUES (5, 263133869699, 'Perfect details');
 
---Providers.
+--------------------------------------- Providers.
 INSERT INTO car_repair_shop.provider (
                                      provider_address_id,
                                      provider_phone_no,
@@ -217,7 +128,7 @@ INSERT INTO car_repair_shop.provider (
                                      provider_nm)
 VALUES (9, 878524123512, '全随机');
 
---Customers.
+---------------------------------------Customers.
 INSERT INTO car_repair_shop.customer (
                                      customer_phone_no,
                                      customer_nm)
@@ -248,7 +159,7 @@ INSERT INTO car_repair_shop.customer (
                                      customer_nm)
 VALUES (263133832335, 'John');
 
---Employee.
+--------------------------------------- Employee.
 INSERT INTO car_repair_shop.employee (
                                       store_address_id,
                                       employee_phone_no,
@@ -341,10 +252,10 @@ INSERT INTO car_repair_shop.employee (
 VALUES (5, 263134554999, 'William', 'Wilson', 'shop assistant', '2010-1-18');
 
 
---Details.
+--------------------------------------- Details.
 ALTER TABLE car_repair_shop.detail RENAME brand_nm TO detail_brand_nm;
 
----------------------------------------------------CRUD.
+--------------------------------------------------- CRUD.
 INSERT INTO car_repair_shop.detail (
                                       detail_brand_nm,
                                       detail_price_amt,
@@ -459,7 +370,7 @@ INSERT INTO car_repair_shop.detail (
 VALUES ('UAZ', 614.250, 'New transfer case for UAZ Patriot');
 
 
---Vehicle.
+--------------------------------------- Vehicle.
 INSERT INTO car_repair_shop.vehicle (
                                       customer_id,
                                       vehicle_brand_nm,
@@ -521,8 +432,8 @@ INSERT INTO car_repair_shop.vehicle (
 VALUES (6, 'Infiniti', 'QX80');
 
 
---Orders.
----------------------------------------------------CRUD.
+--------------------------------------- Orders.
+--------------------------------------------------- CRUD.
 INSERT INTO car_repair_shop.order (
                                       vehicle_id,
                                       employee_id,
@@ -700,8 +611,8 @@ INSERT INTO car_repair_shop.order (
                                       order_delivery_dt)
 VALUES (7, 8, 3, '2019-5-1 14:07:22', '2019-6-1');
 
---Link tables.
---Store_branch_x_provider.
+---------------------------------------------------- Link tables.
+--------------------------------------- Store_branch_x_provider.
 INSERT INTO car_repair_shop.store_branch_x_provider (
 
                                                     store_address_id,
@@ -829,7 +740,7 @@ INSERT INTO car_repair_shop.provider_x_detail (
                                                provider_address_id)
 VALUES (16, 6);
 
---Vehicle_x_detail.
+--------------------------------------- Vehicle_x_detail.
 INSERT INTO car_repair_shop.vehicle_x_detail (
                                                detail_id,
                                                vehicle_id)
@@ -921,7 +832,7 @@ INSERT INTO car_repair_shop.vehicle_x_detail (
 VALUES (16, 5);
 
 
---Order_x_detail
+--------------------------------------- Order_x_detail
 INSERT INTO car_repair_shop.order_x_detail (
                                             order_id,
                                             detail_id)
@@ -1026,97 +937,3 @@ INSERT INTO car_repair_shop.order_x_detail (
                                             order_id,
                                             detail_id)
 VALUES (20, 6);
-
-
---Queries.
---Print the most popular items in descending order of popularity.
-SELECT det.*, count(ord.order_id)
-FROM car_repair_shop.detail det
-INNER JOIN car_repair_shop.order_x_detail ord
-ON det.detail_id = ord.detail_id
-GROUP BY det.detail_id
-ORDER BY count(ord.order_id) DESC;
-
---How much money has been spent in each branch?
-WITH det_x_ord AS (
-  SELECT detail.*, ord.vehicle_id, ord.employee_id, ord.store_address_id, ord.order_application_dttm, ord.order_delivery_dt
-  FROM (
-        SELECT det.*, o_x_d.order_id
-        FROM car_repair_shop.detail det
-        INNER JOIN car_repair_shop.order_x_detail o_x_d
-        ON det.detail_id = o_x_d.detail_id
-         ) detail
-  INNER JOIN car_repair_shop.order ord
-  ON ord.order_id = detail.order_id
-)
-SELECT DISTINCT store.store_branch_nm, sum(det_x_ord.detail_price_amt) OVER (PARTITION BY store.store_address_id) AS store_sum
-FROM car_repair_shop.store_branch store
-INNER JOIN det_x_ord
-ON det_x_ord.store_address_id  = store.store_address_id;
-
---CTE det_x_ord from the previous query will be needed in next queries, so let's create a view.
-CREATE VIEW det_x_ord AS (
-  SELECT p_x_d.*, ord.vehicle_id, ord.employee_id, ord.store_address_id, ord.order_application_dttm, ord.order_delivery_dt
-  FROM (
-        SELECT det.*, o_x_d.order_id
-        FROM car_repair_shop.detail det
-        INNER JOIN car_repair_shop.order_x_detail o_x_d
-        ON det.detail_id = o_x_d.detail_id
-         ) p_x_d
-  INNER JOIN car_repair_shop.order ord
-  ON ord.order_id = p_x_d.order_id
-);
-
---How much money has been earned by every employee?
-SELECT employ.employee_nm, employ.employee_position_nm, sum(det_x_ord.detail_price_amt) AS employee_sum
-FROM car_repair_shop.employee employ
-INNER JOIN det_x_ord
-ON employ.employee_id = det_x_ord.employee_id
-GROUP BY employ.employee_id
-ORDER BY employee_sum;
-
---How much has every provider earned?
-WITH prov_x_det AS (
-  SELECT prov.*, p_x_d.detail_id
-  FROM car_repair_shop.provider prov
-  INNER JOIN car_repair_shop.provider_x_detail p_x_d
-  ON prov.provider_address_id = p_x_d.provider_address_id
-)
-SELECT DISTINCT prov_x_det.provider_nm, sum(det_x_ord.detail_price_amt) OVER (PARTITION BY prov_x_det.provider_address_id) AS employee_sum
-FROM prov_x_det
-INNER JOIN det_x_ord
-ON prov_x_det.detail_id = det_x_ord.detail_id;
-
---How much has every customer spent on every of his car?
-SELECT *, sum(veh_x_det_x_ord.detail_price_amt) OVER (PARTITION BY veh_x_det_x_ord.customer_id)
-FROM  (SELECT veh.vehicle_brand_nm, veh.vehicle_model_nm, veh.customer_id, det_x_ord.*,
-         sum(det_x_ord.detail_price_amt) OVER (PARTITION BY veh.vehicle_id) AS vehicle_sum
-  FROM det_x_ord
-  INNER JOIN car_repair_shop.vehicle veh
-  ON veh.vehicle_id = det_x_ord.vehicle_id) veh_x_det_x_ord;
-
---Create view to see what details are sold in each store and where are they from.
-CREATE VIEW store_x_provider_x_detail AS (
-  SELECT prov_x_det.*, store.store_branch_nm, store.store_phone_no
-  FROM (
-    SELECT prov_x_det.*, store_x_prov.store_address_id
-    FROM (
-      SELECT p_x_d.provider_address_id, p_x_d.provider_phone_no, p_x_d.provider_nm, det.*
-      FROM (
-            SELECT prov.*, p_x_d.detail_id
-            FROM car_repair_shop.provider prov
-            INNER JOIN car_repair_shop.provider_x_detail p_x_d
-            ON prov.provider_address_id = p_x_d.provider_address_id
-             ) p_x_d
-      INNER JOIN car_repair_shop.detail det
-      ON det.detail_id = p_x_d.detail_id) prov_x_det
-    INNER JOIN car_repair_shop.store_branch_x_provider store_x_prov
-    ON store_x_prov.provider_address_id = prov_x_det.provider_address_id) prov_x_det
-  INNER JOIN car_repair_shop.store_branch store
-  ON store.store_address_id = prov_x_det.store_address_id
-);
-
-SELECT st_x_pr_x_det.store_branch_nm, adr.address_country_nm, st_x_pr_x_det.detail_brand_nm, st_x_pr_x_det.detail_price_amt, st_x_pr_x_det.detail_desc
-FROM store_x_provider_x_detail st_x_pr_x_det
-INNER JOIN car_repair_shop.address adr
-ON adr.address_id = st_x_pr_x_det.provider_address_id;
